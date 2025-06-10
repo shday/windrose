@@ -1,1 +1,5 @@
 streamlit
+plotly
+openmeteo_requests
+folium
+streamlit_folium
