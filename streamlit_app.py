@@ -181,12 +181,13 @@ with cols[1]:
         st.plotly_chart(windrose['night'])
 
 with cols[0]:
-    with st.expander("All Data"):
-        st.dataframe(hourly_dataframe,
-                    column_config={
-                    "utc_time": st.column_config.DatetimeColumn(
-                    "UTC Time",
-                    format="D MMM YYYY, h a",
-                    ),
-                    }, hide_index=True)
+    with st.expander("All Data", on_change='rerun') as exp:
+        if exp.open:
+            st.dataframe(hourly_dataframe,
+                        column_config={
+                        "utc_time": st.column_config.DatetimeColumn(
+                        "UTC Time",
+                        format="D MMM YYYY, h a",
+                        ),
+                        }, hide_index=True)
 
