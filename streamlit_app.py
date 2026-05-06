@@ -175,11 +175,11 @@ l =        ['ggplot2', 'seaborn', 'simple_white', 'plotly',
          'plotly_white', 'plotly_dark', 'presentation', 'xgridoff',
          'ygridoff', 'gridon', 'none']
 
-tfs = {'morning':'Morning (6AM to Noon)','afternoon':'Afternoon (Noon to 6PM)',
+time_frames = {'morning':'Morning (6AM to Noon)','afternoon':'Afternoon (Noon to 6PM)',
        'evening':'Evening (6PM to Midnight)','night':'Night (Midnight to 6AM)'}
 
 def time_label(timeframe):
-    return tfs[timeframe]
+    return time_frames[timeframe]
 
 with cols[1]:
     time_frame = st.radio("Timeframe",['morning','afternoon','evening','night'],
