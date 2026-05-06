@@ -154,31 +154,39 @@ windrose = {}
 
 windrose['morning'] = px.bar_polar(mean_hourly_dataframe[mean_hourly_dataframe['hour_bin'] == 6],
                              r="size", theta="compass_point",
-                            color="wind_speed_bin", template="plotly_dark", title=None,
+                            color="wind_speed_bin", template="ygridoff", title=None,
                             color_discrete_sequence= px.colors.sequential.Plasma_r)
 windrose['afternoon'] = px.bar_polar(mean_hourly_dataframe[mean_hourly_dataframe['hour_bin'] == 12],
                               r="size", theta="compass_point",title=None,
-                            color="wind_speed_bin", template="plotly_dark",
+                            color="wind_speed_bin", template="ygridoff",
                             color_discrete_sequence= px.colors.sequential.Plasma_r)
 windrose['evening'] = px.bar_polar(mean_hourly_dataframe[mean_hourly_dataframe['hour_bin'] == 18], 
                              r="size", theta="compass_point",title=None,
-                            color="wind_speed_bin", template="plotly_dark",
+                            color="wind_speed_bin", template="ygridoff",
                             color_discrete_sequence= px.colors.sequential.Plasma_r)
 windrose['night'] = px.bar_polar(mean_hourly_dataframe[mean_hourly_dataframe['hour_bin'] == 0], 
                              r="size", theta="compass_point",title=None,
-                            color="wind_speed_bin", template="plotly_dark",
+                            color="wind_speed_bin", template="ygridoff",
                             color_discrete_sequence= px.colors.sequential.Plasma_r)
 
 
+
+l =        ['ggplot2', 'seaborn', 'simple_white', 'plotly',
+         'plotly_white', 'plotly_dark', 'presentation', 'xgridoff',
+         'ygridoff', 'gridon', 'none']
+
+tfs = {'morning':'Morning (6AM to Noon)','afternoon':'Afternoon (Noon to 6PM)',
+       'evening':'Evening (6PM to Midnight)','night':'Night (Midnight to 6AM)'}
+
+def time_label(timeframe):
+    return tfs[timeframe]
+
 with cols[1]:
-    with st.expander('Morning (6AM to Noon)',expanded=True):
-        st.plotly_chart(windrose['morning'])
-    with st.expander('Afternoon (Noon to 6PM)',expanded=True):
-        st.plotly_chart(windrose['afternoon'])
-    with st.expander('Evening (6PM to Midnight)',expanded=False):
-        st.plotly_chart(windrose['evening'])
-    with st.expander('Night (Midnight to 6AM)',expanded=False):
-        st.plotly_chart(windrose['night'])
+    time_frame = st.radio("Timeframe",['morning','afternoon','evening','night'],
+                          format_func=time_label)
+    st.plotly_chart(windrose[time_frame])
+
+
 
 with cols[0]:
     with st.expander("All Data", on_change='rerun') as exp:
