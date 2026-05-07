@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import openmeteo_requests
 from dash import Dash, dcc, html, Input, Output, State, callback
 import dash_leaflet as dl
+import dash_leaflet.express as dlx
 from functools import lru_cache
 
 openmeteo = openmeteo_requests.Client()
@@ -164,7 +165,7 @@ app.layout = html.Div([
                     dl.Map(
                         [
                             dl.TileLayer(),
-                            dl.MarkerClusterGroup(id="markers", children=[])
+                            dl.LayerGroup(id="markers", children=[])
                         ],
                         id='location-map',
                         style={'height': '400px', 'width': '100%'},
