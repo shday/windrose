@@ -6,7 +6,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import openmeteo_requests
 from dash import Dash, dcc, html, Input, Output, State, callback
-import dash_leaflet as dl
 from functools import lru_cache
 
 openmeteo = openmeteo_requests.Client()
@@ -160,16 +159,7 @@ app.layout = html.Div([
                 # Map
                 html.Div([
                     html.H3("Location"),
-                    dl.Map(
-                        center=[LAT, LNG],
-                        zoom=ZOOM,
-                        children=[
-                            dl.TileLayer(),
-                            dl.Marker(position=[LAT, LNG], id='location-marker')
-                        ],
-                        style={'height': '400px', 'borderRadius': '4px'},
-                        id='map'
-                    )
+                    dcc.Graph(id='location-map', style={'height': '400px'})
                 ], style={'border': '1px solid #ddd', 'padding': '15px', 'borderRadius': '4px',
                          'marginBottom': '20px'}),
                 
@@ -245,6 +235,36 @@ def update_data(n_clicks, month, years, lat, lng):
     }
     
     return df_json, location_data
+
+
+@callback(
+    Output('location-map', 'figure'),
+    Input('location-store', 'data'),
+    prevent_initial_call=False
+)
+def update_map(location_data):
+    if location_data is None:
+        return go.Figure().add_annotation(text="No location data available")
+    
+    coords = location_data['coords']
+    
+    # Create a simple scatter mapbox with a marker at the location
+    fig = px.scatter_mapbox(
+        pd.DataFrame({'lat': [coords[0]], 'lon': [coords[1]], 'name': ['Location']}),
+        lat='lat',
+        lon='lon',
+        hover_name='name',
+        title='Location',
+        zoom=ZOOM
+    )
+    
+    fig.update_layout(
+        mapbox_style='open-street-map',
+        height=400,
+        margin={"r": 0, "t": 30, "l": 0, "b": 0}
+    )
+    
+    return fig
 
 
 @callback(
