@@ -239,20 +239,20 @@ def update_markers(location_data, lat, lng):
 @callback(
     [Output('lat-input', 'value'),
      Output('lng-input', 'value')],
-    Input('location-map', 'click_lat_lng'),
+    Input('location-map', 'n_clicks'),State('location-map','clickData'),
     prevent_initial_call=True
 )
-def update_coords_from_map(click_lat_lng):
+def update_coords_from_map(_,click_lat_lng):
+
     if click_lat_lng is None:
         return LAT, LNG
     
-    try:
-        lat, lng = click_lat_lng
-        return lat, lng
-    except (TypeError, ValueError):
-        pass
     
-    return LAT, LNG
+    lat, lng = click_lat_lng['latlng']['lat'], click_lat_lng['latlng']['lng']
+   
+    return lat, lng
+    
+ 
 
 
 @callback(
