@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import openmeteo_requests
 from dash import Dash, dcc, html, Input, Output, State, callback
+import dash_leaflet as dl
 from functools import lru_cache
 
 openmeteo = openmeteo_requests.Client()
@@ -160,7 +161,16 @@ app.layout = html.Div([
                 html.Div([
                     html.H3("Location"),
                     html.P("Click on the map to update coordinates", style={'fontSize': '12px', 'color': '#666', 'marginBottom': '10px'}),
-                    dcc.Graph(id='location-map', style={'height': '400px'})
+                    dl.Map(
+                        [
+                            dl.TileLayer(),
+                            dl.MarkerClusterGroup(id="markers", children=[])
+                        ],
+                        id='location-map',
+                        style={'height': '400px', 'width': '100%'},
+                        center=CENTER_START,
+                        zoom=ZOOM
+                    )
                 ], style={'border': '1px solid #ddd', 'padding': '15px', 'borderRadius': '4px',
                          'marginBottom': '20px'}),
                 
@@ -207,23 +217,38 @@ app.layout.children.append(dcc.Store(id='location-store', data={'coords': CENTER
 
 
 @callback(
+    Output('markers', 'children'),
+    [Input('location-store', 'data'),
+     Input('lat-input', 'value'),
+     Input('lng-input', 'value')],
+    prevent_initial_call=False
+)
+def update_markers(location_data, lat, lng):
+    if lat is None or lng is None:
+        lat, lng = CENTER_START
+    
+    return [
+        dl.Marker(
+            position=[lat, lng],
+            children=dl.Popup("Location")
+        )
+    ]
+
+
+@callback(
     [Output('lat-input', 'value'),
      Output('lng-input', 'value')],
-    Input('location-map', 'clickData'),
+    Input('location-map', 'click_lat_lng'),
     prevent_initial_call=True
 )
-def update_coords_from_map(clickData):
-    if clickData is None:
+def update_coords_from_map(click_lat_lng):
+    if click_lat_lng is None:
         return LAT, LNG
     
     try:
-        points = clickData.get('points', [])
-        if points:
-            lat = points[0].get('customdata', [None])[0]
-            lon = points[0].get('lon')
-            if lat is not None and lon is not None:
-                return lat, lon
-    except (KeyError, IndexError, TypeError):
+        lat, lng = click_lat_lng
+        return lat, lng
+    except (TypeError, ValueError):
         pass
     
     return LAT, LNG
@@ -259,45 +284,6 @@ def update_data(n_clicks, month, years, lat, lng):
     }
     
     return df_json, location_data
-
-
-@callback(
-    Output('location-map', 'figure'),
-    [Input('location-store', 'data'),
-     Input('lat-input', 'value'),
-     Input('lng-input', 'value')],
-    prevent_initial_call=False
-)
-def update_map(location_data, lat, lng):
-    if lat is None or lng is None:
-        lat, lng = CENTER_START
-    
-    # Create a scatter mapbox with a marker at the location
-    fig = px.scatter_mapbox(
-        pd.DataFrame({
-            'lat': [lat],
-            'lon': [lng],
-            'name': ['Location'],
-            'custom_data': [lat]
-        }),
-        lat='lat',
-        lon='lon',
-        hover_name='name',
-        custom_data=['custom_data'],
-        title='Location',
-        zoom=ZOOM
-    )
-    
-    fig.update_traces(marker=dict(size=12, color='red'))
-    
-    fig.update_layout(
-        mapbox_style='open-street-map',
-        height=400,
-        margin={"r": 0, "t": 30, "l": 0, "b": 0},
-        hovermode='closest'
-    )
-    
-    return fig
 
 
 @callback(
